@@ -3,6 +3,7 @@
 
 import logging
 import os
+import uuid
 from sanji.core import Sanji
 from sanji.core import Route
 from sanji.model_initiator import ModelInitiator
@@ -50,16 +51,29 @@ class Hellosanji(Sanji):
     @Route(methods="post", resource="/hellosanji")
     def post(self, message, response):
         if hasattr(message, "data"):
-            self.message = {"id": 53}
-            return response(data=self.message)
+            obj = {}
+            obj["id"] = uuid.uuid4()
+            obj["message"] = message.data
+            self.model.db["conversationList"].append(obj)
+            return response(data={"id": obj["id"]})
         return response(code=400, data={"message": "Invalid Post Input."})
 
     @Route(methods="delete", resource="/hellosanji/:id")
     def delete(self, message, response):
 
+        del_item = None
         if "id" in message.param:
-            self.message = "delete index: %s" % message.param["id"]
-            return response()
+            for item in self.model.db["conversationList"]:
+                if item["id"] == message.param["id"]:
+                    del_item = item
+                    break
+
+            if del_item:
+                del del_item
+                self.message = "delete index: %s" % message.param["id"]
+                return response(self.message)
+            else:
+                return response(code=400, data={"message": "id is not found."})
 
         return response(code=400, data={"message": "Invalid Delete Input."})
 

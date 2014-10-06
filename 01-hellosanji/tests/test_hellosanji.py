@@ -87,7 +87,9 @@ class TestHellosanjiClass(unittest.TestCase):
 
         # case 1: post successfully
         def resp1(code=200, data=None):
+            self.assertEqual(200, code)
             self.assertTrue("id" in data)
+            self.assertFalse("message" in data)
 
         self.hellosanji.post(message=message, response=resp1, test=True)
 
@@ -101,23 +103,33 @@ class TestHellosanjiClass(unittest.TestCase):
         self.hellosanji.post(message=message, response=resp2, test=True)
 
     def test_delete(self):
+        # case 1: delete successfully
         message = Message(
-            {"data": {"message": "call delete()"}, "param": {"id": 40}})
+            {"data": {"message": "call delete()"}, "param": {"id": 2}})
 
-        # case 1: post successfully
         def resp1(code=200, data=None):
-            self.assertEqual(self.hellosanji.message, "delete index: 40")
+            self.assertEqual(self.hellosanji.message, "delete index: 2")
 
         self.hellosanji.delete(message=message, response=resp1, test=True)
 
-        # case 2: delete bad request
-        del message.param["id"]
+        # case 2: delete failed
+        message = Message(
+            {"data": {"message": "call delete()"}, "param": {"id": 1995}})
 
         def resp2(code=200, data=None):
+            self.assertEqual(data["message"], "id is not found.")
+
+        self.hellosanji.delete(message=message, response=resp2, test=True)
+
+        # case 3: delete with bad request
+        message = Message(
+            {"data": {"message": "call delete()"}, "param": {}})
+
+        def resp3(code=200, data=None):
             self.assertEqual(400, code)
             self.assertEqual(data, {"message": "Invalid Delete Input."})
 
-        self.hellosanji.delete(message=message, response=resp2, test=True)
+        self.hellosanji.delete(message=message, response=resp3, test=True)
 
 
 if __name__ == "__main__":
