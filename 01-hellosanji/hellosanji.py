@@ -20,12 +20,14 @@ class Hellosanji(Sanji):
     @Route(methods="get", resource="/hellosanji")
     def get(self, message, response):
 
+        # case 3: collection get
         if "collection" in message.query:
             if message.query["collection"] == "true":
                 # collection=true
                 return response(
                     data={"collection": self.model.db["conversationList"]})
 
+        # case 2: single id
         if "id" in message.param:
             rsp_msg = None
             for item in self.model.db["conversationList"]:
@@ -35,7 +37,7 @@ class Hellosanji(Sanji):
 
             return response(data=rsp_msg)
 
-        # capability
+        # case 1: capability
         id_list = []
         for item in self.model.db["conversationList"]:
             id_list.append(item["id"])
@@ -45,17 +47,23 @@ class Hellosanji(Sanji):
     def put(self, message, response):
         if hasattr(message, "data"):
             self.message = message.data["message"]
+            # case 1: put successfully
             return response()
+
+        # case 2: put with bad request
         return response(code=400, data={"message": "Invaild Input."})
 
     @Route(methods="post", resource="/hellosanji")
     def post(self, message, response):
         if hasattr(message, "data"):
+            # case 1: post successfully
             obj = {}
             obj["id"] = uuid.uuid4()
             obj["message"] = message.data
             self.model.db["conversationList"].append(obj)
             return response(data={"id": obj["id"]})
+
+        # case 2: post with bad request
         return response(code=400, data={"message": "Invalid Post Input."})
 
     @Route(methods="delete", resource="/hellosanji/:id")
@@ -69,12 +77,15 @@ class Hellosanji(Sanji):
                     break
 
             if del_item:
+                # case 1: delete successfully
                 del del_item
                 self.message = "delete index: %s" % message.param["id"]
                 return response(self.message)
             else:
+                # case 2: delete failed
                 return response(code=400, data={"message": "id is not found."})
 
+        # case 3: delete with bad request
         return response(code=400, data={"message": "Invalid Delete Input."})
 
 
