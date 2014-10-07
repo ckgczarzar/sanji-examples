@@ -48,6 +48,7 @@ class Hellosanji(Sanji):
         if hasattr(message, "data"):
             self.message = message.data["message"]
             # case 1: put successfully
+            self.model.save_db()
             return response()
 
         # case 2: put with bad request
@@ -58,9 +59,10 @@ class Hellosanji(Sanji):
         if hasattr(message, "data"):
             # case 1: post successfully
             obj = {}
-            obj["id"] = uuid.uuid4()
+            obj["id"] = str(uuid.uuid4())
             obj["message"] = message.data
             self.model.db["conversationList"].append(obj)
+            self.model.save_db()
             return response(data={"id": obj["id"]})
 
         # case 2: post with bad request
@@ -80,6 +82,7 @@ class Hellosanji(Sanji):
                 # case 1: delete successfully
                 del del_item
                 self.message = "delete index: %s" % message.param["id"]
+                self.model.save_db()
                 return response(self.message)
             else:
                 # case 2: delete failed

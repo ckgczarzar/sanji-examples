@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-
+import json
 import os
 import sys
 import unittest
@@ -26,6 +26,12 @@ class TestHellosanjiClass(unittest.TestCase):
     def tearDown(self):
         self.hellosanji.stop()
         self.hellosanji = None
+        # Remove hellosanji.json
+        db_file = os.path.abspath(os.path.dirname(__file__))\
+            + "/../data/hellosanji.json"
+
+        if os.path.exists(db_file):
+            os.remove(db_file)
 
     def test_get(self):
 
@@ -131,6 +137,13 @@ class TestHellosanjiClass(unittest.TestCase):
 
         self.hellosanji.delete(message=message, response=resp3, test=True)
 
+    def print_db_file(self):
+        db_file = os.path.abspath(os.path.dirname(__file__))\
+            + "/../data/hellosanji.json"
+        with open(db_file) as fp:
+            db_data = json.load(fp)
+
+        print db_data
 
 if __name__ == "__main__":
     unittest.main()
